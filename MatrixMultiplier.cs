@@ -2,6 +2,7 @@ public class MatrixMultiplier
 {
   public void Assigment01()
   {
+    //size of matrixes
     int Arows = (int)Math.Pow(10, 6);
     int Acols = (int)Math.Pow(10, 3);
 
@@ -19,10 +20,14 @@ public class MatrixMultiplier
     while computing A(BC) needs 30×5×60 + 10×30×60 = 27,000 multiplications.
     */
 
+
+    //B matrix is loaded to memory one row at the time
     var Brow = new double[Bcols];
+    //C matrix is small so it can be loaded as once
     var C = MatrixMultiplier.CreateMatrixWithRandowNumbers(Crows, Ccols);
     var BC = new double[Brows, Ccols];
 
+    //First multiply B and C because then result is smaller matrix and there is need to do less operations
     //B*C
     for (int rowI = 0; rowI < Brows; rowI++)
     {
@@ -33,9 +38,10 @@ public class MatrixMultiplier
       }
     }
 
+    //Then simply multiply A with result of BC to get D
     //A*BC
     var Arow = new double[Bcols];
-    var ABC = new double[Arows, Ccols];
+    var D = new double[Arows, Ccols];
 
     var hist = new int[101];
     var pdf = new double[101];
@@ -43,29 +49,38 @@ public class MatrixMultiplier
 
     for (int rowI = 0; rowI < Arows; rowI++)
     {
+      //same as with B. A matrix is loaded to memoery one row at the time
       Arow = MatrixMultiplier.CreateRowWithRandowNumbers(Acols);
       for (int colI = 0; colI < Acols; colI++)
       {
         var a = Arow[colI];
+        //using value to identify bin in histogram
         var aHistIndex = (int)(Math.Round(a, 2, MidpointRounding.AwayFromZero) * 100);
+        //create histogram to later to create PDF and from PDF CDF
         hist[aHistIndex]++;
-        ABC[rowI, 0] += a * BC[colI, 0];
+        D[rowI, 0] += a * BC[colI, 0];
       }
     }
 
+    //for the normalization
     double aSum = (double)(Arows * Acols);
 
     for (int i = 0; i < hist.Length; i++)
     {
+      //create normalized PDF
       pdf[i] = hist[i] / aSum;
-      double prevCdf = i > 0 ? cdf[i - 1] : 0; 
+      double prevCdf = i > 0 ? cdf[i - 1] : 0;
+      // 
       cdf[i] += prevCdf + pdf[i];
+      //print CDF value to console to copy paste value to Excel
+      //to have plot
       Console.WriteLine(cdf[i]);
     }
   }
 
   private static double[,] CreateMatrixWithRandowNumbers(int m, int n)
   {
+    //create new matrix with random values
     var mat = new double[m, n];
     for (int i = 0; i < m; i++)
     {
@@ -80,6 +95,7 @@ public class MatrixMultiplier
 
   private static double[] CreateRowWithRandowNumbers(int n)
   {
+    //create single row vector of matrix
     var mat = new double[n];
     for (int j = 0; j < n; j++)
     {
